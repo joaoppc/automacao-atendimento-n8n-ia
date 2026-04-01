@@ -8,7 +8,7 @@ Criar um workflow automatizado no n8n que recebe mensagens via webhook, utiliza 
 
 - **Workflow:** O fluxo exportado está no arquivo [`My workflow.json`](./My workflow.json).
 - **Prompt da IA:** O texto exato utilizado para instruir o modelo está documentado no arquivo [`prompt.txt`](./prompt.txt).
-- **Vídeo de Apresentação:** [Insira o link do seu vídeo aqui - YouTube/Loom/Drive].
+- **Vídeo de Apresentação:** [https://drive.google.com/file/d/1NRtUACgqdf_BOdLLZcAiSCgLV2msbirl/view?usp=sharing].
 
 ## Payloads de teste
 ```
