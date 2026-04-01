@@ -30,7 +30,7 @@ Criar um workflow automatizado no n8n que recebe mensagens via webhook, utiliza 
    {
      "nome": "Maria",
      "email": "maria@email.com",
-     "mensagem": "Quero ajuda plano"
+     "mensagem": "Quero ajuda com o plano"
    }
 
 
