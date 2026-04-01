@@ -1,0 +1,513 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "atendimento",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        -16
+      ],
+      "id": "d7a98cba-91a6-400a-ae5e-5d91702b2da0",
+      "name": "Webhook",
+      "webhookId": "e46ba0db-b110-403d-9302-054ee77ed758"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "40a6383c-ad84-47b9-bbb6-28a16bab1b0e",
+              "leftValue": "={{ $json.body.mensagem }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        224,
+        -16
+      ],
+      "id": "663daa41-5c8e-4d23-ae04-e0c9f314a5e5",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Você é um assistente de triagem. Analise a seguinte mensagem de cliente: \"{{ $json.body.mensagem }}\"\n\nSua tarefa é extrair as informações e retornar EXATAMENTE um JSON com as seguintes chaves:\n1. \"categoria\": Classifique estritamente como \"vendas\", \"suporte\" ou \"cancelamento\"[cite: 31, 32, 33, 38].\n2. \"intencao\": Um resumo curto da intenção do cliente[cite: 40].\n3. \"urgencia\": Classifique estritamente como \"baixa\", \"média\" ou \"alta\"[cite: 41].",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        448,
+        -16
+      ],
+      "id": "676d5845-dcc7-4714-8f47-66287f9c733b",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"categoria\": {\n      \"type\": \"string\",\n      \"description\": \"Classifique estritamente como 'vendas', 'suporte' ou 'cancelamento'.\"\n    },\n    \"intencao\": {\n      \"type\": \"string\",\n      \"description\": \"Um resumo curto e direto da intenção do cliente.\"\n    },\n    \"urgencia\": {\n      \"type\": \"string\",\n      \"description\": \"Classifique estritamente a urgência como 'baixa', 'média' ou 'alta'.\"\n    }\n  },\n  \"required\": [\n    \"categoria\",\n    \"intencao\",\n    \"urgencia\"\n  ]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        584,
+        208
+      ],
+      "id": "a8c47a48-5fb7-4255-9d14-0936caefca68",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.categoria}}",
+                    "rightValue": "vendas",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "938877a2-330b-443d-9480-1c1ee6a608d9"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "786c1bec-b3c0-484b-b918-71759991c7fa",
+                    "leftValue": "={{ $json.output.categoria}}",
+                    "rightValue": "suporte",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "fd8c68d3-de5e-4ef5-b838-c3e1b36297e7",
+                    "leftValue": "={{ $json.output.categoria}}",
+                    "rightValue": "cancelamento",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        800,
+        -32
+      ],
+      "id": "d73b6254-1d21-46e2-a7c5-982fe5983840",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "sendTo": "jppc9292@gmail.com",
+        "subject": "Suporte",
+        "message": "=Usuario {{ $('If').item.json.body.nome }} de email {{ $('If').item.json.body.email }} precisando de suporte",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1024,
+        -16
+      ],
+      "id": "ef26f6d8-75c2-4ac1-acbc-813ec9b04505",
+      "name": "Send a message",
+      "webhookId": "6144286e-4f87-4535-b50a-debfcb06f076",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "LXxQxJdPj2VDMAUs",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f5e4af19-99e9-4628-aac4-2d180ac9c36a",
+              "name": "tipo",
+              "value": "cancelamento",
+              "type": "string"
+            },
+            {
+              "id": "c3cdf9b5-fb6c-4617-a85b-f08372473b4a",
+              "name": "resposta",
+              "value": "Recebemos sua solicitação e vamos priorizar seu atendimento.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1024,
+        176
+      ],
+      "id": "496ca469-51f8-45a6-8a11-a645b9d87de5",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-flash-latest",
+        "options": {
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        456,
+        208
+      ],
+      "id": "f68c175f-e3d8-40ed-98a5-5781cfa35333",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "uzd6OqQl52TZw3us",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1248,
+        176
+      ],
+      "id": "0ffd4a20-d102-404f-8096-5ac6cb45923c",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1LOzWrHYG5ycLWVkk-xjs7tbvtdFPVVEQKkP7OA7qrRU",
+          "mode": "list",
+          "cachedResultName": "Leads - Pange.iA",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LOzWrHYG5ycLWVkk-xjs7tbvtdFPVVEQKkP7OA7qrRU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Página1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LOzWrHYG5ycLWVkk-xjs7tbvtdFPVVEQKkP7OA7qrRU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Urgência": "={{ $json.output.urgencia }}",
+            "Intenção": "={{ $json.output.intencao }}",
+            "Mensagem": "Possível venda detectada",
+            "Email": "={{ $('If').item.json.body.email }}",
+            "Nome": "={{ $('If').item.json.body.nome }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Nome",
+              "displayName": "Nome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Mensagem",
+              "displayName": "Mensagem",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Intenção",
+              "displayName": "Intenção",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Urgência",
+              "displayName": "Urgência",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1024,
+        -208
+      ],
+      "id": "bd928f3d-a86b-4444-9738-2df71985753c",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PKOZPXWNfKwbD2DE",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1248,
+        -208
+      ],
+      "id": "e4170277-c134-41c6-8a1a-27fc94c1d625",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1248,
+        -16
+      ],
+      "id": "5a69fd84-6438-42f5-9ed0-e80f5aeb00be",
+      "name": "Respond to Webhook2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "7f8ee312-20b4-4646-ae93-a88dec40fbe0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7dcd241236eb479e4fda930030250b4be29e832212ef0b74fb5ad10b6cf9dfc5"
+  },
+  "id": "mX3RUsiGoMYE7s71zYzDr",
+  "tags": []
+}
