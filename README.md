@@ -10,13 +10,7 @@ Criar um workflow automatizado no n8n que recebe mensagens via webhook, utiliza 
 - **Prompt da IA:** O texto exato utilizado para instruir o modelo está documentado no arquivo [`prompt.txt`](./prompt.txt).
 - **Vídeo de Apresentação:** [Insira o link do seu vídeo aqui - YouTube/Loom/Drive].
 
-## ⚙️ Como importar e testar
-
-1. Copie o conteúdo do arquivo `workflow_n8n.json`.
-2. No seu ambiente n8n, crie um novo workflow e cole o conteúdo (Ctrl+V / Cmd+V) diretamente na tela.
-3. Configure as credenciais no nó da IA (ex: OpenAI API Key).
-4. Ative o fluxo e envie um `POST` para a URL de teste do Webhook utilizando o seguinte payload:
-   ```json
+## Payloads de teste
    {
      "nome": "Maria",
      "email": "maria@email.com",
@@ -34,7 +28,7 @@ Criar um workflow automatizado no n8n que recebe mensagens via webhook, utiliza 
    }
 
 
-##Raciocinio
+## Raciocinio
 
 
 Input: O Webhook recebe uma das opções de payload mostrados acima. Implementei uma validação inicial com o nó if para garantir que campos vitais (como mensagem) não cheguem vazios.
